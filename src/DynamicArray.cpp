@@ -5,7 +5,7 @@
 
 void DynamicArray::validateValue(int value) {
     if (value < -100 || value > 100) {
-        throw std::out_of_range("Value must be in the range [-100, 100]");
+        throw std::invalid_argument("Value must be in the range [-100, 100]");
     }
 }
 
