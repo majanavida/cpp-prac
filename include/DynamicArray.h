@@ -28,6 +28,24 @@ private:
     }
 
 public:
+    class ElementReference {
+    private:
+        DynamicArray& array_;
+        int index_;
+
+    public:
+        ElementReference(DynamicArray& array, int index) : array_(array), index_(index) {}
+
+        operator T() const {
+            return array_.get(index_);
+        }
+
+        ElementReference& operator=(const T& value) {
+            array_.set(index_, value);
+            return *this;
+        }
+    };
+
     explicit DynamicArray(int size) : data_(nullptr), size_(size) {
         if (size < 0) {
             throw std::invalid_argument("Array size cannot be negative");
@@ -67,6 +85,86 @@ public:
         return size_;
     }
 
+    ElementReference operator[](int index) {
+        validateIndex(index);
+        return ElementReference(*this, index);
+    }
+
+    const T& operator[](int index) const {
+        validateIndex(index);
+        return data_[index];
+    }
+
+    bool operator==(const DynamicArray& other) const {
+        if (size_ != other.size_) {
+            return false;
+        }
+        for (int i = 0; i < size_; ++i) {
+            if (data_[i] != other.data_[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const DynamicArray& other) const {
+        return !(*this == other);
+    }
+
+    DynamicArray& operator+=(const DynamicArray& other) {
+        for (int i = 0; i < size_; ++i) {
+            const T otherValue = i < other.size_ ? other.data_[i] : T{};
+            const T result = data_[i] + otherValue;
+            validateValue(result);
+            data_[i] = result;
+        }
+        return *this;
+    }
+
+    DynamicArray& operator-=(const DynamicArray& other) {
+        for (int i = 0; i < size_; ++i) {
+            const T otherValue = i < other.size_ ? other.data_[i] : T{};
+            const T result = data_[i] - otherValue;
+            validateValue(result);
+            data_[i] = result;
+        }
+        return *this;
+    }
+
+    DynamicArray& operator+=(const T& value) {
+        for (int i = 0; i < size_; ++i) {
+            const T result = data_[i] + value;
+            validateValue(result);
+            data_[i] = result;
+        }
+        return *this;
+    }
+
+    DynamicArray& operator-=(const T& value) {
+        for (int i = 0; i < size_; ++i) {
+            const T result = data_[i] - value;
+            validateValue(result);
+            data_[i] = result;
+        }
+        return *this;
+    }
+
+    T* begin() {
+        return data_;
+    }
+
+    T* end() {
+        return size_ == 0 ? data_ : data_ + size_;
+    }
+
+    const T* begin() const {
+        return data_;
+    }
+
+    const T* end() const {
+        return size_ == 0 ? data_ : data_ + size_;
+    }
+
     void append(const T& value) {
         validateValue(value);
         T* expanded = new T[size_ + 1];
@@ -80,17 +178,11 @@ public:
     }
 
     void add(const DynamicArray& other) {
-        for (int i = 0; i < size_; ++i) {
-            const T otherValue = i < other.size_ ? other.data_[i] : T{};
-            data_[i] += otherValue;
-        }
+        *this += other;
     }
 
     void subtract(const DynamicArray& other) {
-        for (int i = 0; i < size_; ++i) {
-            const T otherValue = i < other.size_ ? other.data_[i] : T{};
-            data_[i] -= otherValue;
-        }
+        *this -= other;
     }
 
     double distance(const DynamicArray& other) const {
