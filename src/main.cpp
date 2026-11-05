@@ -1,73 +1,53 @@
 #include "DynamicArray.h"
 
-#include <cstddef>
 #include <iostream>
-#include <exception>
-#include <limits>
-#include <new>
-#include <stdexcept>
+#include <string>
 
 int main() {
     try {
-        // Задание 1: создание массива, установка и получение элемента.
-        DynamicArray arrayA(3);
-        arrayA.set(0, 10);
-        arrayA.set(1, 20);
-        arrayA.set(2, 30);
-        std::cout << "arrayA: ";
-        arrayA.print();
-        std::cout << "arrayA[1] = " << arrayA.get(1) << "\n";
+        // часть 1: создаём массив, записываем и читаем значения
+        DynamicArray<int> first(3);
+        first.set(0, 1);
+        first.set(1, 2);
+        first.set(2, 3);
 
-        // Задание 2: независимая копия массива.
-        DynamicArray copiedArray(arrayA);
-        copiedArray.set(0, -10);
-        std::cout << "Copied array: ";
-        copiedArray.print();
-        std::cout << "Original array: ";
-        arrayA.print();
+        // часть 3: выводим массивы и находим расстояние между массивами одного размера
+        DynamicArray<int> second(3);
+        second.set(0, 4);
+        second.set(1, 5);
+        second.set(2, 6);
 
-        // Задание 3: добавление элемента в конец.
-        arrayA.append(40);
-        std::cout << "arrayA after append: ";
-        arrayA.print();
+        std::cout << "First array: " << first << '\n';
+        std::cout << "Second array: " << second << '\n';
+        std::cout << "Distance: " << first.distance(second) << '\n';
 
-        // Задание 4: недостающие элементы второго массива считаются нулями.
-        DynamicArray arrayB(2);
-        arrayB.set(0, 1);
-        arrayB.set(1, 2);
-        arrayA.add(arrayB);
-        std::cout << "arrayA after add(arrayB): ";
-        arrayA.print();
-        arrayA.subtract(arrayB);
-        std::cout << "arrayA after subtract(arrayB): ";
-        arrayA.print();
-
-        // Проверка выхода индекса за границы массива.
+        // часть 2: проверяем исключения для неверного индекса и значения
         try {
-            arrayA.get(arrayA.size());
+            first.get(first.size());
         } catch (const std::out_of_range& error) {
-            std::cout << "Caught std::out_of_range: " << error.what() << "\n";
+            std::cout << "Caught std::out_of_range: " << error.what() << '\n';
         }
 
-        // Проверка значения вне диапазона [-100, 100].
         try {
-            arrayA.set(0, 101);
+            first.set(0, 101);
         } catch (const std::invalid_argument& error) {
-            std::cout << "Caught std::invalid_argument: " << error.what() << "\n";
+            std::cout << "Caught std::invalid_argument: " << error.what() << '\n';
         }
 
-        // Запрос невозможного размера массива гарантированно вызывает
-        // std::bad_array_new_length, производный от std::bad_alloc.
+        // часть 3: шаблонный массив можно создать и для строк
+        DynamicArray<std::string> words(2);
+        words.set(0, "hello");
+        words.set(1, "world");
+        std::cout << "Words: " << words << '\n';
+
+        // для строк расстояние не определено, поэтому ловим std::bad_typeid
         try {
-            volatile std::size_t tooManyElements =
-                std::numeric_limits<std::size_t>::max() / sizeof(int) + 1;
-            int* impossibleArray = new int[tooManyElements];
-            delete[] impossibleArray;
-        } catch (const std::bad_alloc& error) {
-            std::cout << "Caught std::bad_alloc: " << error.what() << "\n";
+            std::cout << words.distance(words) << '\n';
+        } catch (const std::bad_typeid&) {
+            std::cout << "Distance is only defined for numeric arrays.\n";
         }
     } catch (const std::exception& error) {
-        std::cerr << "Error: " << error.what() << "\n";
+        std::cerr << "Error: " << error.what() << '\n';
         return 1;
     }
 
