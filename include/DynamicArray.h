@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <type_traits>
-#include <utility>
 
 template <typename T>
 class DynamicArray {
