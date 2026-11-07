@@ -9,7 +9,7 @@
 
 int main() {
     try {
-        // Задание 1: создание массива, установка и получение элемента.
+        // часть 1: создаём массив, записываем и читаем значения
         DynamicArray arrayA(3);
         arrayA.set(0, 10);
         arrayA.set(1, 20);
@@ -18,7 +18,7 @@ int main() {
         arrayA.print();
         std::cout << "arrayA[1] = " << arrayA.get(1) << "\n";
 
-        // Задание 2: независимая копия массива.
+        // часть 1: проверяем, что изменения копии не затрагивают исходный массив
         DynamicArray copiedArray(arrayA);
         copiedArray.set(0, -10);
         std::cout << "Copied array: ";
@@ -26,12 +26,12 @@ int main() {
         std::cout << "Original array: ";
         arrayA.print();
 
-        // Задание 3: добавление элемента в конец.
+        // часть 1: добавляем элемент в конец массива
         arrayA.append(40);
         std::cout << "arrayA after append: ";
         arrayA.print();
 
-        // Задание 4: недостающие элементы второго массива считаются нулями.
+        // часть 1: складываем и вычитаем массивы разного размера
         DynamicArray arrayB(2);
         arrayB.set(0, 1);
         arrayB.set(1, 2);
@@ -42,22 +42,21 @@ int main() {
         std::cout << "arrayA after subtract(arrayB): ";
         arrayA.print();
 
-        // Проверка выхода индекса за границы массива.
+        // часть 2: проверяем обработку индекса за границами массива
         try {
             arrayA.get(arrayA.size());
         } catch (const std::out_of_range& error) {
             std::cout << "Caught std::out_of_range: " << error.what() << "\n";
         }
 
-        // Проверка значения вне диапазона [-100, 100].
+        // часть 2: проверяем обработку значения вне допустимого диапазона
         try {
             arrayA.set(0, 101);
         } catch (const std::invalid_argument& error) {
             std::cout << "Caught std::invalid_argument: " << error.what() << "\n";
         }
 
-        // Запрос невозможного размера массива гарантированно вызывает
-        // std::bad_array_new_length, производный от std::bad_alloc.
+        // часть 2: проверяем обработку ошибки выделения памяти
         try {
             volatile std::size_t tooManyElements =
                 std::numeric_limits<std::size_t>::max() / sizeof(int) + 1;
