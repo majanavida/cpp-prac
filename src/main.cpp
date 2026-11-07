@@ -1,6 +1,9 @@
 #include "DynamicArray.h"
 
+#include <cstddef>
 #include <iostream>
+#include <limits>
+#include <new>
 #include <string>
 #include <utility>
 
@@ -46,6 +49,16 @@ int main() {
             std::cout << "Caught std::invalid_argument: " << error.what() << '\n';
         }
 
+        // часть 2: проверяем обработку ошибки выделения памяти
+        try {
+            volatile std::size_t tooManyElements =
+                std::numeric_limits<std::size_t>::max() / sizeof(int) + 1;
+            int* impossibleArray = new int[tooManyElements];
+            delete[] impossibleArray;
+        } catch (const std::bad_alloc& error) {
+            std::cout << "Caught std::bad_alloc: " << error.what() << '\n';
+        }
+
         // часть 3: выводим числовые массивы и находим расстояние между ними
         DynamicArray<int> second(3);
         second.set(0, 4);
@@ -53,6 +66,13 @@ int main() {
         second.set(2, 6);
         std::cout << "Second array: " << second << '\n';
         std::cout << "Distance: " << second.distance(copied) << '\n';
+
+        // часть 3: проверяем, что для массивов разного размера возникает ошибка
+        try {
+            std::cout << second.distance(shortArray) << '\n';
+        } catch (const std::invalid_argument& error) {
+            std::cout << "Caught std::invalid_argument: " << error.what() << '\n';
+        }
 
         // часть 3: проверяем шаблонный массив для строк и ошибку расстояния
         DynamicArray<std::string> words(2);
@@ -83,6 +103,21 @@ int main() {
             value += 1;
         }
         std::cout << "After loop: " << second << '\n';
+
+        // часть 4: проверяем ошибки при обращении по неверному индексу и значению
+        try {
+            (void)second[second.size()];
+        } catch (const std::out_of_range& error) {
+            std::cout << "Caught std::out_of_range from operator[]: "
+                      << error.what() << '\n';
+        }
+
+        try {
+            second[0] = 101;
+        } catch (const std::invalid_argument& error) {
+            std::cout << "Caught std::invalid_argument from operator[]: "
+                      << error.what() << '\n';
+        }
 
         // часть 5: передаём массив по значению сначала копированием
         showByValue(second);
