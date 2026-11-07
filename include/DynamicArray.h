@@ -3,9 +3,11 @@
 
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <typeinfo>
 #include <type_traits>
+#include <utility>
 
 template <typename T>
 class DynamicArray {
@@ -64,7 +66,43 @@ public:
         }
     }
 
-    DynamicArray& operator=(const DynamicArray& other) = delete;
+    DynamicArray& operator=(const DynamicArray& other) {
+        if (this == &other) {
+            return *this;
+        }
+
+        std::unique_ptr<T[]> copiedData;
+        if (other.size_ > 0) {
+            copiedData.reset(new T[other.size_]);
+            for (int i = 0; i < other.size_; ++i) {
+                copiedData[i] = other.data_[i];
+            }
+        }
+
+        delete[] data_;
+        data_ = copiedData.release();
+        size_ = other.size_;
+        return *this;
+    }
+
+    DynamicArray(DynamicArray&& other) noexcept
+        : data_(other.data_), size_(other.size_) {
+        other.data_ = nullptr;
+        other.size_ = 0;
+    }
+
+    DynamicArray& operator=(DynamicArray&& other) noexcept {
+        if (this == &other) {
+            return *this;
+        }
+
+        delete[] data_;
+        data_ = other.data_;
+        size_ = other.size_;
+        other.data_ = nullptr;
+        other.size_ = 0;
+        return *this;
+    }
 
     ~DynamicArray() {
         delete[] data_;
